@@ -1,0 +1,112 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.COMPILE_SDK_VERSION
+    buildToolsVersion rootProject.ext.BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        useLibrary 'org.apache.http.legacy'
+        minSdkVersion rootProject.ext.MIN_SDK_VERSION
+        targetSdkVersion rootProject.ext.TARGET_SDK_VERSION
+        versionCode 103
+        versionName '1.0.3'
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled rootProject.ext.MINIFY_ENABLED
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled rootProject.ext.MINIFY_ENABLED
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
+}
+
+dependencies {
+    api 'com.google.code.gson:gson:2.8.5'
+    api files('libs/fastjson-1.2.5.jar')
+    api files('libs/httpmime-4.2.4.jar')
+    api files('libs/jackson-all-1.7.6.jar')
+    api files('libs/jackson-annotations-2.5.0.jar')
+    api files('libs/jackson-core-2.5.0.jar')
+    api files('libs/jackson-databind-2.5.0.jar')
+    api files('libs/jsoup-1.8.1.jar')
+    api files('libs/libidn-1.15.jar')
+    api files('libs/minidns-0.1.3.jar')
+    api files('libs/universal-image-loader-1.9.4.jar')
+    api files('libs/xUtils-2.6.14.jar')
+    api 'com.squareup.okhttp3:okhttp:3.11.0'
+    //环信
+    api 'com.hyphenate:hyphenate-sdk:3.3.0'
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+def libVerName = android.defaultConfig.versionName
+def libName = 'dataproviderex'
+//生成源文件
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+//生成文档
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.encoding "UTF-8"
+    options.charSet 'UTF-8'
+    options.author true
+    options.version true
+    options.links "https://github.com/Daimhim/"
+    failOnError false
+}
+
+//文档打包成jar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+//拷贝javadoc文件
+task copyDoc(type: Copy) {
+    from "${buildDir}/docs/"
+    into "docs"
+}
+
+//上传到jcenter所需要的源码文件
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+//上传到jcenter
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def user = properties.getProperty("bintray.user")    //读取 local.properties 文件里面的 bintray.user
+def key = properties.getProperty("bintray.apikey")   //读取 local.properties 文件里面的 bintray.apikey
+uploadArchives {
+    configuration = configurations.archives
+    repositories {
+        mavenDeployer {
+            // 私有仓库的地址，以及账户
+            repository(url: 'http://113.140.6.106:9081/nexus/content/repositories/android/') {
+                authentication(userName: user, password: key)
+            }
+            // Library的配置
+            pom.project {
+                version libVerName
+                artifactId libName
+                groupId 'net.meyki.library'
+                packaging 'aar'
+                description 'data providerex'
+            }
+        }
+    }
+}

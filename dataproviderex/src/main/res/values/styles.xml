@@ -1,0 +1,16 @@
+<resources>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- 状态栏颜色 -->
+        <item name="colorPrimaryDark">@color/black</item>
+        <!-- 窗口的背景颜色 -->
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <!-- 灰色文字 -->
+    <style name="text_gray">
+        <item name="android:textColor">@color/theme_gray</item>
+    </style>
+
+</resources>
