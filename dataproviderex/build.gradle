@@ -65,7 +65,7 @@ task javadoc(type: Javadoc) {
     options.charSet 'UTF-8'
     options.author true
     options.version true
-    options.links "https://github.com/Daimhim/"
+    options.links "https://github.com/wangle2/"
     failOnError false
 }
 
